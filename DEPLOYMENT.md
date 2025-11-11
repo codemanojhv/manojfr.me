@@ -3,8 +3,30 @@
 ## ✅ Completed Steps
 - ✅ Ninja star favicon created (`src/app/icon.svg`)
 - ✅ Code pushed to GitHub: https://github.com/codemanojhv/manojfr.me.git
+- ✅ Vercel auto-deployment configured (pushes to `main` branch auto-deploy)
 
-## 🚀 Deploy to Vercel
+## 🚀 Quick Deploy (Update Site)
+
+### Method 1: PowerShell Script (Windows)
+```powershell
+.\deploy.ps1 "Your commit message"
+```
+
+### Method 2: NPM Script
+```bash
+npm run deploy
+```
+
+### Method 3: Manual Git Commands
+```bash
+git add .
+git commit -m "Your commit message"
+git push origin main
+```
+
+**Note:** Once you push to GitHub, Vercel automatically deploys in ~1-2 minutes!
+
+## 🚀 Initial Deploy to Vercel
 
 ### Method 1: Vercel Dashboard (Recommended - Auto Deploys)
 
@@ -53,7 +75,18 @@
 
 - Your site will be live at the Vercel URL
 - Add custom domain in Vercel project settings if needed
-- All future pushes to GitHub will auto-deploy
+- **All future pushes to GitHub will auto-deploy automatically!**
+
+## 🔄 Auto-Deployment Workflow
+
+1. Make changes to your code
+2. Run `npm run deploy` or `.\deploy.ps1 "Update message"`
+3. Changes are pushed to GitHub
+4. Vercel automatically detects the push
+5. Site deploys in ~1-2 minutes
+6. Done! 🎉
+
+**No manual deployment needed - it's all automatic!**
 
 ## 🔗 Links
 
