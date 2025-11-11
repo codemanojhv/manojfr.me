@@ -6,7 +6,7 @@ import { Slider } from "@/components/ui/slider"
 import { Navigation } from "@/components/Navigation"
 import { ContentSection } from "@/components/ContentSection"
 
-const narrativeText = `HI IM MANOJ 🧍‍♂️
+const narrativeText = `HI, I'M MANOJ 🧍‍♂️
 
 I'M IN COLLEGE
 
@@ -34,7 +34,7 @@ I GAME 🎮
 
 PEOPLE CALL IT "LACK OF FOCUS"
 
-I CALL IT BEING ALIVE.
+I CALL IT BEING ==green:ALIVE.==
 
 I LOVE WHAT I DO ❤️
 
@@ -48,7 +48,7 @@ IN TECH
 
 AND IN PEOPLE 🧠
 
-SOMETIMES I STARE AT THE UNIVERSE
+SOMETIMES I STARE AT THE ==purple:UNIVERSE==
 
 LIKE IT BETTER EXPLAIN ITSELF 🪐
 
@@ -56,7 +56,7 @@ BLACK HOLES MAKE MORE SENSE THAN HUMANS.
 
 I LEARN BY MESSING UP.
 
-I F*CK AROUND,
+I ==red:F*CK== AROUND, 
 
 FLOP,
 
@@ -65,7 +65,7 @@ ADJUST &
 RUN IT BACK 🔁
 
 I BUILD 
-
+   
 STUFF I WANTED TO EXIST
 
 LIFE'S BASICALLY:

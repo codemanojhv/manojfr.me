@@ -23,6 +23,87 @@ function isEmojiToken(token: string) {
   })
 }
 
+// Named color mappings for easy customization
+// Colors are optimized for glassmorphism effect (will be applied with 0.2 opacity + blur)
+const HIGHLIGHT_COLORS: Record<string, string> = {
+  // Basic colors - using full saturation for glass effect
+  'red': 'rgba(239, 68, 68, 1)', // red-500
+  'blue': 'rgba(59, 130, 246, 1)', // blue-500
+  'green': 'rgba(34, 197, 94, 1)', // green-500
+  'yellow': 'rgba(234, 179, 8, 1)', // yellow-500
+  'purple': 'rgba(168, 85, 247, 1)', // purple-500
+  'pink': 'rgba(236, 72, 153, 1)', // pink-500
+  'orange': 'rgba(249, 115, 22, 1)', // orange-500
+  'cyan': 'rgba(6, 182, 212, 1)', // cyan-500
+  'indigo': 'rgba(99, 102, 241, 1)', // indigo-500
+  'teal': 'rgba(20, 184, 166, 1)', // teal-500
+  'lime': 'rgba(132, 204, 22, 1)', // lime-500
+  'amber': 'rgba(245, 158, 11, 1)', // amber-500
+  'emerald': 'rgba(16, 185, 129, 1)', // emerald-500
+  'violet': 'rgba(139, 92, 246, 1)', // violet-500
+  'fuchsia': 'rgba(217, 70, 239, 1)', // fuchsia-500
+  'rose': 'rgba(244, 63, 94, 1)', // rose-500
+  'sky': 'rgba(14, 165, 233, 1)', // sky-500
+  // Default - subtle white for glass effect
+  'default': 'rgba(255, 255, 255, 1)',
+  'white': 'rgba(255, 255, 255, 1)',
+}
+
+// Parse highlight syntax: ==color:text== or ==text==
+// Supports: ==red:text==, ==#ff0000:text==, ==bg-blue-500:text==, ==text== (default)
+function parseHighlight(highlightText: string): { text: string; bgColor: string; isTailwind: boolean; tailwindClass?: string } {
+  // Remove the == markers
+  const inner = highlightText.slice(2, -2).trim()
+  
+  // Find the first colon to separate color from text
+  const colonIndex = inner.indexOf(':')
+  
+  // If no colon, it's just text with default color
+  if (colonIndex === -1) {
+    return { text: inner, bgColor: HIGHLIGHT_COLORS.default, isTailwind: false }
+  }
+  
+  const colorPart = inner.substring(0, colonIndex).trim()
+  const textPart = inner.substring(colonIndex + 1).trim()
+  
+  // Check if it's a hex color: ==#ff0000:text== or ==#f00:text==
+  if (colorPart.startsWith('#')) {
+    const hex = colorPart.replace('#', '')
+    let r: number, g: number, b: number
+    
+    if (hex.length === 3) {
+      // 3-digit hex (e.g., #f00)
+      r = parseInt(hex[0] + hex[0], 16)
+      g = parseInt(hex[1] + hex[1], 16)
+      b = parseInt(hex[2] + hex[2], 16)
+    } else if (hex.length === 6) {
+      // 6-digit hex (e.g., #ff0000)
+      r = parseInt(hex.substring(0, 2), 16)
+      g = parseInt(hex.substring(2, 4), 16)
+      b = parseInt(hex.substring(4, 6), 16)
+    } else {
+      // Invalid hex, use default
+      return { text: textPart || inner, bgColor: HIGHLIGHT_COLORS.default, isTailwind: false }
+    }
+    
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+      return { text: textPart || inner, bgColor: HIGHLIGHT_COLORS.default, isTailwind: false }
+    }
+    
+    return { text: textPart, bgColor: `rgba(${r}, ${g}, ${b}, 1)`, isTailwind: false }
+  }
+  
+  // Check if it's a Tailwind class: ==bg-blue-500:text==
+  if (colorPart.startsWith('bg-')) {
+    return { text: textPart, bgColor: '', isTailwind: true, tailwindClass: colorPart }
+  }
+  
+  // Check if it's a named color: ==red:text==
+  const colorName = colorPart.toLowerCase()
+  const bgColor = HIGHLIGHT_COLORS[colorName] || HIGHLIGHT_COLORS.default
+  return { text: textPart, bgColor, isTailwind: false }
+}
+
 export function ContentSection({ text, sliderValue }: ContentSectionProps) {
   const [hoveredIndex, setHoveredIndex] = useState<string | null>(null)
   const [windowWidth, setWindowWidth] = useState(1200) // Use consistent initial value
@@ -171,11 +252,15 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
       // Account for highlight and bold markers
       const isHighlight = wordData.word.startsWith("==") && wordData.word.endsWith("==")
       const isBold = wordData.word.startsWith("**") && wordData.word.endsWith("**")
-      const displayWord = isHighlight 
-        ? wordData.word.slice(2, -2) 
-        : isBold 
-        ? wordData.word.slice(2, -2) 
-        : wordData.word
+      let displayWord: string
+      if (isHighlight) {
+        const parsed = parseHighlight(wordData.word)
+        displayWord = parsed.text
+      } else if (isBold) {
+        displayWord = wordData.word.slice(2, -2)
+      } else {
+        displayWord = wordData.word
+      }
       estimatedWidth += displayWord.length * charWidth
       // Add padding for highlighted words (px-2 = 8px on each side = 16px total)
       if (isHighlight) {
@@ -273,19 +358,67 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
           // Check if word should be bold (starts with **) or highlighted (starts with ==)
           const isBold = word.startsWith("**") && word.endsWith("**")
           const isHighlight = word.startsWith("==") && word.endsWith("==")
-          const displayWord = isBold ? word.slice(2, -2) : isHighlight ? word.slice(2, -2) : word
+          
+          let displayWord: string
+          let highlightStyle: React.CSSProperties = {}
+          let highlightClassName = ""
+          
+          if (isHighlight) {
+            const parsed = parseHighlight(word)
+            displayWord = parsed.text
+            
+            if (parsed.isTailwind && parsed.tailwindClass) {
+              // Use Tailwind class for background with glassmorphism
+              highlightClassName = `px-2.5 py-1 ${parsed.tailwindClass}/20 rounded-xl backdrop-blur-xl border border-white/20 shadow-lg`
+              highlightStyle = {
+                backdropFilter: 'blur(16px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.25)',
+              }
+            } else {
+              // Use inline style for custom color with glassmorphism
+              // Extract RGB values from rgba color and create glass effect
+              const rgbaMatch = parsed.bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
+              if (rgbaMatch) {
+                const r = rgbaMatch[1]
+                const g = rgbaMatch[2]
+                const b = rgbaMatch[3]
+                // Create glassmorphism effect with multiple layers
+                highlightStyle = {
+                  backgroundColor: `rgba(${r}, ${g}, ${b}, 0.2)`,
+                  backdropFilter: 'blur(16px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: `0 8px 32px 0 rgba(${r}, ${g}, ${b}, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.25)`,
+                }
+              } else {
+                // Fallback for non-rgba colors
+                highlightStyle = {
+                  backgroundColor: parsed.bgColor,
+                  backdropFilter: 'blur(16px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.25)',
+                }
+              }
+              highlightClassName = "px-2.5 py-1 rounded-xl"
+            }
+          } else if (isBold) {
+            displayWord = word.slice(2, -2)
+          } else {
+            displayWord = word
+          }
 
           return (
             <span
               key={uniqueId}
-              className={`inline-block transition-opacity duration-200 ${
+              className={`inline-block transition-all duration-200 ${
                 isBold ? "font-bold" : ""
-              } ${
-                isHighlight 
-                  ? "px-2 py-1 bg-white/20 rounded-lg backdrop-blur-sm" 
-                  : ""
-              }`}
-              style={{ opacity: isDimmed ? 0.2 : 1 }}
+              } ${highlightClassName}`}
+              style={{ 
+                opacity: isDimmed ? 0.2 : 1,
+                ...highlightStyle
+              }}
             >
               {displayWord}
             </span>
