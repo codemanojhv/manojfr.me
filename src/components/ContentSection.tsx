@@ -45,22 +45,42 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
     // Split text into lines (by double newlines or single newlines)
     const lines = text.split(/\n+/).filter(line => line.trim().length > 0)
     
-    // Process lines to handle bold text (**text**) that might span multiple words
+    // Process lines to handle bold text (**text**) and highlighted text (==text==) that might span multiple words
     const processLine = (line: string): string[] => {
       const words: string[] = []
       let currentWord = ""
       let inBold = false
+      let inHighlight = false
       
       const tokens = line.trim().split(/\s+/)
       tokens.forEach((token) => {
-        if (token.startsWith("**") && token.endsWith("**")) {
+        // Check for highlight first (==text==)
+        if (token.startsWith("==") && token.endsWith("==") && token.length > 4) {
+          // Single word highlight
+          words.push(token)
+        } else if (token.startsWith("==") && !inHighlight && !inBold) {
+          // Start of highlight
+          inHighlight = true
+          currentWord = token
+        } else if (token.endsWith("==") && token.length >= 3 && inHighlight) {
+          // End of highlight
+          currentWord += " " + token
+          words.push(currentWord)
+          currentWord = ""
+          inHighlight = false
+        } else if (inHighlight) {
+          // Middle of highlight
+          currentWord += " " + token
+        }
+        // Check for bold (**text**)
+        else if (token.startsWith("**") && token.endsWith("**") && token.length > 4) {
           // Single word bold
           words.push(token)
-        } else if (token.startsWith("**")) {
+        } else if (token.startsWith("**") && !inBold && !inHighlight) {
           // Start of bold
           inBold = true
           currentWord = token
-        } else if (token.endsWith("**") && inBold) {
+        } else if (token.endsWith("**") && token.length >= 3 && inBold) {
           // End of bold
           currentWord += " " + token
           words.push(currentWord)
@@ -75,7 +95,7 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
         }
       })
       
-      if (currentWord) words.push(currentWord) // Handle unclosed bold
+      if (currentWord) words.push(currentWord) // Handle unclosed bold or highlight
       
       return words
     }
@@ -148,7 +168,19 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
     if (isImageToken(wordData.word) || isEmojiToken(wordData.word)) {
       estimatedWidth += effectiveWindowWidth >= 1024 ? 56 : effectiveWindowWidth >= 640 ? 48 : 40
     } else {
-      estimatedWidth += wordData.word.length * charWidth
+      // Account for highlight and bold markers
+      const isHighlight = wordData.word.startsWith("==") && wordData.word.endsWith("==")
+      const isBold = wordData.word.startsWith("**") && wordData.word.endsWith("**")
+      const displayWord = isHighlight 
+        ? wordData.word.slice(2, -2) 
+        : isBold 
+        ? wordData.word.slice(2, -2) 
+        : wordData.word
+      estimatedWidth += displayWord.length * charWidth
+      // Add padding for highlighted words (px-2 = 8px on each side = 16px total)
+      if (isHighlight) {
+        estimatedWidth += 16
+      }
     }
     estimatedWidth += wordGap
   })
@@ -238,14 +270,21 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
             )
           }
 
-          // Check if word should be bold (starts with **)
+          // Check if word should be bold (starts with **) or highlighted (starts with ==)
           const isBold = word.startsWith("**") && word.endsWith("**")
-          const displayWord = isBold ? word.slice(2, -2) : word
+          const isHighlight = word.startsWith("==") && word.endsWith("==")
+          const displayWord = isBold ? word.slice(2, -2) : isHighlight ? word.slice(2, -2) : word
 
           return (
             <span
               key={uniqueId}
-              className={`inline-block transition-opacity duration-200 ${isBold ? "font-bold" : ""}`}
+              className={`inline-block transition-opacity duration-200 ${
+                isBold ? "font-bold" : ""
+              } ${
+                isHighlight 
+                  ? "px-2 py-1 bg-white/20 rounded-lg backdrop-blur-sm" 
+                  : ""
+              }`}
               style={{ opacity: isDimmed ? 0.2 : 1 }}
             >
               {displayWord}

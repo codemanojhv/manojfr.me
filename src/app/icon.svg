@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Ninja Star (Shuriken) -->
+  <g transform="translate(50, 50)">
+    <!-- Outer star points -->
+    <path d="M 0 -40 L 8 -8 L 40 0 L 8 8 L 0 40 L -8 8 L -40 0 L -8 -8 Z" 
+          fill="#ffffff" 
+          stroke="#000000" 
+          stroke-width="2"/>
+    <!-- Inner circle -->
+    <circle cx="0" cy="0" r="12" fill="#000000"/>
+    <!-- Inner star points -->
+    <path d="M 0 -18 L 4 -6 L 18 0 L 4 6 L 0 18 L -4 6 L -18 0 L -4 -6 Z" 
+          fill="#ffffff"/>
+  </g>
+</svg>
+

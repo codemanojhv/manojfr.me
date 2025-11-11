@@ -6,7 +6,7 @@ import { Slider } from "@/components/ui/slider"
 import { Navigation } from "@/components/Navigation"
 import { ContentSection } from "@/components/ContentSection"
 
-const narrativeText = `HI, I'M MANOJ 🧍‍♂️
+const narrativeText = `HI IM MANOJ 🧍‍♂️
 
 I'M IN COLLEGE
 
@@ -24,7 +24,7 @@ AND ACT LIKE THAT WAS ALWAYS THE PLAN.
 
 I DESIGN
 
-I CODE
+I CODE 
 
 I PAINT
 
@@ -56,25 +56,17 @@ BLACK HOLES MAKE MORE SENSE THAN HUMANS.
 
 I LEARN BY MESSING UP.
 
-I FUCK AROUND
+I F*CK AROUND,
 
-FLOP
+FLOP,
 
-ADJUST
+ADJUST &
 
 RUN IT BACK 🔁
 
-RIGHT NOW I'M BUILDING
+I BUILD 
 
-**BLUD SOCIAL** 🔗
-
-AND
-
-**THEUX.SPACE** ✦
-
-THINGS I WANTED TO EXIST
-
-SO I BUILT THEM.
+STUFF I WANTED TO EXIST
 
 LIFE'S BASICALLY:
 
