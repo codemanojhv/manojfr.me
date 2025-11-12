@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "git add . && git commit -m \"Update site\" && git push origin main"
+    "deploy": "git add . && git commit -m \"Update site\" && git push origin main",
+    "auto-commit": "powershell -ExecutionPolicy Bypass -File ./auto-commit.ps1",
+    "ac": "npm run auto-commit"
   },
   "dependencies": {
     "next": "^14.0.4",
