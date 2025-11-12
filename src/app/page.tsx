@@ -34,7 +34,7 @@ I GAME 🎮
 
 PEOPLE CALL IT "LACK OF FOCUS"
 
-I CALL IT BEING ==green:ALIVE==.
+I CALL IT BEING ==blue:ALIVE==.
 
 I LOVE WHAT I DO ❤️
 
@@ -82,7 +82,7 @@ export default function Home() {
   }
 
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-black">
+    <main className="relative h-screen h-dvh w-screen w-dvw overflow-hidden bg-black">
       <Navigation />
       
       {/* Content Sections - Full width, centered like anikjain.com */}
@@ -102,8 +102,8 @@ export default function Home() {
         <div className="h-24 w-24 rounded-full bg-white/10 backdrop-blur-sm xl:h-28 xl:w-28"></div>
       </motion.div>
 
-      {/* Slider - Bottom Centered */}
-      <div className="absolute bottom-0 left-0 right-0 z-50 flex justify-center px-5 pb-6 sm:pb-8 lg:pb-12">
+      {/* Slider - Bottom Centered - Increased padding on mobile for better visibility */}
+      <div className="absolute bottom-0 left-0 right-0 z-50 flex justify-center px-5 pb-20 sm:pb-8 lg:pb-12">
         <div className="w-full max-w-[90%] sm:max-w-[85%] lg:max-w-[80%]">
           <Slider
             value={sliderValue}
