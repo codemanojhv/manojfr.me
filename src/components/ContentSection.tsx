@@ -1,12 +1,21 @@
 "use client"
 
 import Image from "next/image"
-import { motion } from "framer-motion"
-import { useState, useEffect, useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect, useMemo, useRef } from "react"
 
 interface ContentSectionProps {
   text: string
   sliderValue: number
+}
+
+// URL mapping for clickable highlights
+const HIGHLIGHT_URLS: Record<string, string> = {
+  'CHAOS': '/chaos',
+  'ALIVE': '/alive',
+  'HEART': '/heart',
+
+  
 }
 
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".svg", ".webp"] as const
@@ -104,10 +113,65 @@ function parseHighlight(highlightText: string): { text: string; bgColor: string;
   return { text: textPart, bgColor, isTailwind: false }
 }
 
+// Hover Preview Component
+function HoverPreview({ 
+  text, 
+  color, 
+  x, 
+  y 
+}: { 
+  text: string
+  color: string
+  x: number
+  y: number 
+}) {
+  const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
+  const r = rgbaMatch ? rgbaMatch[1] : '255'
+  const g = rgbaMatch ? rgbaMatch[2] : '255'
+  const b = rgbaMatch ? rgbaMatch[3] : '255'
+
+  return (
+    <motion.div
+      className="fixed pointer-events-none z-50"
+      initial={{ opacity: 0, scale: 0.8, y: y - 20 }}
+      animate={{ opacity: 1, scale: 1, y: y - 10 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      style={{
+        left: `${x}px`,
+        top: `${y}px`,
+        transform: 'translateX(-50%)', // Center horizontally relative to x position
+      }}
+    >
+      <div
+        className="px-4 py-3 rounded-2xl backdrop-blur-2xl border shadow-2xl min-w-[200px]"
+        style={{
+          backgroundColor: `rgba(${r}, ${g}, ${b}, 0.15)`,
+          backdropFilter: 'blur(24px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(200%)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: `0 20px 60px 0 rgba(${r}, ${g}, ${b}, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)`,
+        }}
+      >
+        <p className="text-white text-sm font-medium uppercase tracking-wide">
+          {text}
+        </p>
+        <p className="text-white/60 text-xs mt-1">
+          Click to explore →
+        </p>
+      </div>
+    </motion.div>
+  )
+}
+
 export function ContentSection({ text, sliderValue }: ContentSectionProps) {
   const [hoveredIndex, setHoveredIndex] = useState<string | null>(null)
+  const [previewPosition, setPreviewPosition] = useState<{ x: number; y: number } | null>(null)
+  const [previewText, setPreviewText] = useState<string>("")
+  const [previewColor, setPreviewColor] = useState<string>("rgba(255, 255, 255, 1)")
   const [windowWidth, setWindowWidth] = useState(1200) // Use consistent initial value
   const [isMounted, setIsMounted] = useState(false)
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Track window width for responsive calculations (only on client after mount)
   useEffect(() => {
@@ -282,12 +346,23 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
   const shouldJustify = widthRatio >= justifyThreshold && effectiveWindowWidth >= 1024
 
   return (
-    <div 
-      className="w-full flex transition-all duration-700 ease-out px-5 lg:pl-10 lg:pr-20"
-      style={{
-        justifyContent: shouldCenter ? "center" : "flex-start",
-      }}
-    >
+    <>
+      <AnimatePresence>
+        {previewPosition && (
+          <HoverPreview
+            text={previewText}
+            color={previewColor}
+            x={previewPosition.x}
+            y={previewPosition.y}
+          />
+        )}
+      </AnimatePresence>
+      <div 
+        className="w-full flex transition-all duration-700 ease-out px-5 lg:pl-10 lg:pr-20"
+        style={{
+          justifyContent: shouldCenter ? "center" : "flex-start",
+        }}
+      >
       <p
         suppressHydrationWarning
         className={`flex flex-wrap gap-x-3 gap-y-2 text-base leading-8 uppercase tracking-tight text-white lg:text-[1.5vw] lg:leading-[1.6] transition-all duration-700 ${
@@ -362,9 +437,10 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
           let displayWord: string
           let highlightStyle: React.CSSProperties = {}
           let highlightClassName = ""
+          let parsed: { text: string; bgColor: string; isTailwind: boolean; tailwindClass?: string } | null = null
           
           if (isHighlight) {
-            const parsed = parseHighlight(word)
+            parsed = parseHighlight(word)
             displayWord = parsed.text
             
             if (parsed.isTailwind && parsed.tailwindClass) {
@@ -376,32 +452,38 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
                 boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.25)',
               }
             } else {
-              // Use inline style for custom color with glassmorphism
+              // Use inline style for custom color with enhanced glassmorphism
               // Extract RGB values from rgba color and create glass effect
               const rgbaMatch = parsed.bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
               if (rgbaMatch) {
                 const r = rgbaMatch[1]
                 const g = rgbaMatch[2]
                 const b = rgbaMatch[3]
-                // Create glassmorphism effect with multiple layers
+                // Enhanced glassmorphism effect with more blur, glow, and depth
                 highlightStyle = {
-                  backgroundColor: `rgba(${r}, ${g}, ${b}, 0.2)`,
-                  backdropFilter: 'blur(16px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: `0 8px 32px 0 rgba(${r}, ${g}, ${b}, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.25)`,
+                  backgroundColor: `rgba(${r}, ${g}, ${b}, 0.15)`,
+                  backdropFilter: 'blur(20px) saturate(200%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  boxShadow: `
+                    0 8px 32px 0 rgba(${r}, ${g}, ${b}, 0.25),
+                    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                    inset 0 1px 0 0 rgba(255, 255, 255, 0.3)
+                  `,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 }
               } else {
                 // Fallback for non-rgba colors
                 highlightStyle = {
                   backgroundColor: parsed.bgColor,
-                  backdropFilter: 'blur(16px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.25)',
+                  backdropFilter: 'blur(20px) saturate(200%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.3)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 }
               }
-              highlightClassName = "px-2.5 py-1 rounded-xl"
+              highlightClassName = "px-2.5 py-1 rounded-xl cursor-pointer"
             }
           } else if (isBold) {
             displayWord = word.slice(2, -2)
@@ -409,23 +491,76 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
             displayWord = word
           }
 
+          // Check if this highlight is clickable
+          const clickableUrl = isHighlight ? HIGHLIGHT_URLS[displayWord.toUpperCase()] : null
+          const isClickable = clickableUrl !== undefined
+
+          // Enhanced hover styles for clickable highlights
+          const hoverStyle: React.CSSProperties = isHovered && isHighlight ? {
+            transform: 'scale(1.05) translateY(-2px)',
+            backgroundColor: highlightStyle.backgroundColor?.replace('0.15', '0.25').replace('0.2', '0.3') || highlightStyle.backgroundColor,
+            boxShadow: highlightStyle.boxShadow?.toString().replace('0.25', '0.4').replace('0.2', '0.35') || highlightStyle.boxShadow,
+            border: '1px solid rgba(255, 255, 255, 0.4)',
+          } : {}
+
+          const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
+            setHoveredIndex(uniqueId)
+            if (isClickable && isHighlight && parsed) {
+              // Clear any existing timeout
+              if (hoverTimeoutRef.current) {
+                clearTimeout(hoverTimeoutRef.current)
+              }
+              // Show preview after a short delay
+              hoverTimeoutRef.current = setTimeout(() => {
+                const rect = e.currentTarget.getBoundingClientRect()
+                setPreviewPosition({
+                  x: rect.left + rect.width / 2, // Center horizontally
+                  y: rect.top - 60 // Position above the word
+                })
+                setPreviewText(displayWord)
+                setPreviewColor(parsed.bgColor)
+              }, 300)
+            }
+          }
+
+          const handleMouseLeave = () => {
+            setHoveredIndex(null)
+            if (hoverTimeoutRef.current) {
+              clearTimeout(hoverTimeoutRef.current)
+            }
+            setPreviewPosition(null)
+          }
+
+          const handleClick = () => {
+            if (isClickable && clickableUrl) {
+              window.open(clickableUrl, '_blank')
+            }
+          }
+
           return (
-            <span
+            <motion.span
               key={uniqueId}
-              className={`inline-block transition-all duration-200 ${
+              className={`inline-block transition-all duration-300 ${
                 isBold ? "font-bold" : ""
-              } ${highlightClassName}`}
+              } ${highlightClassName} ${isClickable ? "hover:scale-105" : ""}`}
               style={{ 
                 opacity: isDimmed ? 0.2 : 1,
-                ...highlightStyle
+                ...highlightStyle,
+                ...hoverStyle
               }}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={handleClick}
+              whileHover={isClickable ? { scale: 1.05, y: -2 } : {}}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
               {displayWord}
-            </span>
+            </motion.span>
           )
         })}
       </p>
     </div>
+    </>
   )
 }
 
