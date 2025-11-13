@@ -12,10 +12,15 @@ interface ContentSectionProps {
 // URL mapping for clickable highlights
 const HIGHLIGHT_URLS: Record<string, string> = {
   'CHAOS': '/chaos',
-  'ALIVE': '/alive',
-  'HEART': '/heart',
-
-  
+  'CO-PILOT': '/chaos',
+  'FIGHTS GODS IN HIS HEAD': '/mind',
+  'STOLEN FROM ALTERNATE TIMELINES': '/projects',
+  'TECH NECROMANCER': '/code',
+  'VIOLENTLY ALIVE': '/alive',
+  'UNIVERSE': '/universe',
+  'BLACK HOLES': '/universe',
+  'FAILURES': '/learn',
+  'MAGIC': '/magic',
 }
 
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".svg", ".webp"] as const
@@ -182,7 +187,13 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
 
     updateWidth()
     window.addEventListener("resize", updateWidth)
-    return () => window.removeEventListener("resize", updateWidth)
+    return () => {
+      window.removeEventListener("resize", updateWidth)
+      // Clean up hover timeout on unmount
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+      }
+    }
   }, [])
 
   // Memoize word processing to ensure consistency between server and client
@@ -265,9 +276,20 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
     // Calculate which words are visible based on slider progress
     // This must be consistent between server and client
     const visibleIndices = new Set<number>()
+    
+    // Find the last index of the first line to make all first line words visible at 0%
+    let firstLineLastIndex = -1
+    for (let i = 0; i < allWordsArray.length; i++) {
+      if (allWordsArray[i].lineIndex === 0) {
+        firstLineLastIndex = i
+      } else {
+        break
+      }
+    }
+    
     allWordsArray.forEach((wordData) => {
-      // First few words always visible
-      if (wordData.globalIndex < 3) {
+      // All words from the first line (including emojis) always visible at 0%
+      if (wordData.lineIndex === 0 && wordData.globalIndex <= firstLineLastIndex) {
         visibleIndices.add(wordData.globalIndex)
         return
       }
@@ -377,8 +399,11 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
           const isVisible = visibleWordIndices.has(wordData.globalIndex)
           const uniqueId = `${wordData.globalIndex}-${wordData.word}`
           const word = wordData.word
-
-          if (!isVisible && wordData.globalIndex > 2) {
+          
+          // All words from the first line are always visible
+          const isFirstLine = wordData.lineIndex === 0
+          
+          if (!isVisible && !isFirstLine) {
             return null
           }
 
@@ -510,15 +535,28 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
               if (hoverTimeoutRef.current) {
                 clearTimeout(hoverTimeoutRef.current)
               }
+              // Store element reference before setTimeout
+              const targetElement = e.currentTarget
               // Show preview after a short delay
               hoverTimeoutRef.current = setTimeout(() => {
-                const rect = e.currentTarget.getBoundingClientRect()
-                setPreviewPosition({
-                  x: rect.left + rect.width / 2, // Center horizontally
-                  y: rect.top - 60 // Position above the word
-                })
-                setPreviewText(displayWord)
-                setPreviewColor(parsed.bgColor)
+                // Check if element still exists and is mounted
+                if (!targetElement || !document.contains(targetElement)) {
+                  return
+                }
+                try {
+                  const rect = targetElement.getBoundingClientRect()
+                  if (rect) {
+                    setPreviewPosition({
+                      x: rect.left + rect.width / 2, // Center horizontally
+                      y: rect.top - 60 // Position above the word
+                    })
+                    setPreviewText(displayWord)
+                    setPreviewColor(parsed.bgColor)
+                  }
+                } catch (error) {
+                  // Silently fail if element is no longer available
+                  console.warn('Could not get bounding rect for preview:', error)
+                }
               }, 300)
             }
           }
