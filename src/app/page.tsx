@@ -5,50 +5,51 @@ import { motion } from "framer-motion"
 import { Slider } from "@/components/ui/slider"
 import { Navigation } from "@/components/Navigation"
 import { ContentSection } from "@/components/ContentSection"
+import { BackgroundEffect } from "@/components/BackgroundEffect"
 
-const narrativeText = `HI, I'M MANOJ 🧍‍♂️
+const narrativeText = `HI, I'M MANOJ manoj.png ,
 
 THE DUDE IN COLLEGE WHO LOOKS LIKE HE'S FREESTYLING LIFE
 
-BUT LOWKEY ==purple:FIGHTS GODS IN HIS HEAD== ⚔️
+BUT LOWKEY ==purple:FIGHTS GODS IN HIS HEAD== .
 
-==red:CHAOS== ISN'T AN ACCIDENT
+==red:CHAOS== ISN'T AN ACCIDENT,
 
-IT'S THE ==cyan:CO-PILOT== 🚀 
+IT'S THE ==cyan:CO-PILOT== 🚀 .
 
-BUILDS THINGS THAT FEEL ==cyan:STOLEN FROM ALTERNATE TIMELINES==
+BUILDS THINGS THAT FEEL ==cyan:STOLEN FROM ALTERNATE TIMELINES== .
 
-BREAKS THEM FOR FUN
+BREAKS THEM FOR FUN.
 
-RESURRECTS THEM LIKE A ==violet:TECH NECROMANCER== 💀⚡
+RESURRECTS THEM LIKE A ==violet:TECH NECROMANCER== 💀⚡ .
 
-DESIGNING 🎨
+DESIGNING 🎨.
 
-CODING 💻
+CODING 💻.
 
-PAINTING 🖌️
+PAINTING 🖌️.  
 
-WRITING ✍️
+  WRITING ✍️.
 
-GAMING 🎮
+GAMING 🎮.
 
-WHATEVER THE BRAIN DEMANDS THAT DAY 🧠
+WHATEVER THE BRAIN DEMANDS THAT DAY 🧠.
 
-PEOPLE CALL IT "LACK OF FOCUS"
+PEOPLE CALL IT "LACK OF FOCUS",
 
-BUT IT LOOKS MORE LIKE BEING ==red:VIOLENTLY ALIVE== 🔥
+BUT IT LOOKS MORE LIKE BEING ==red:VIOLENTLY ALIVE== 🔥.
 
-THE ==purple:UNIVERSE== GETS STARED AT
+THE ==purple:UNIVERSE== GETS STARED AT.
+ 
+LIKE IT'S HIDING ANSWERS 🪐.
 
-LIKE IT'S HIDING ANSWERS 🪐
+==purple:BLACK HOLES== STILL MAKE MORE SENSE THAN HUMANS ⚫.  
 
-==purple:BLACK HOLES== STILL MAKE MORE SENSE THAN HUMANS ⚫
+==orange:FAILURES== GET MADE LOUDLY 🔊.  
 
-==orange:FAILURES== GET MADE LOUDLY 🔊
+LESSONS GET ABSORBED QUICK.
 
-LESSONS GET ABSORBED QUICK
-
-AND WORLDS GET BUILT THAT NEVER EXISTED BEFORE ✨
+AND WORLDS GET BUILT THAT NEVER EXISTED BEFORE ✨.
 
 LIFE HAS TWO MODES:
 
@@ -71,27 +72,24 @@ export default function Home() {
 
   return (
     <main className="relative h-screen h-dvh w-screen w-dvw overflow-hidden bg-black">
+      <BackgroundEffect />
       <Navigation />
       
       {/* Content Sections - Full width, centered like anikjain.com */}
-      <div className="absolute inset-0 flex items-center justify-center pb-32 overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center pb-32 overflow-hidden z-10">
         <div className="w-full flex flex-col justify-center">
           <ContentSection text={narrativeText} sliderValue={sliderValue[0]} />
         </div>
       </div>
 
-      {/* Portrait Placeholder - will be replaced with actual image */}
-      <motion.div
-        className="absolute right-[5%] top-1/2 hidden -translate-y-1/2 xl:block"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: sliderValue[0] > 5 ? 0.15 : 0, scale: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="h-24 w-24 rounded-full bg-white/10 backdrop-blur-sm xl:h-28 xl:w-28"></div>
-      </motion.div>
 
-      {/* Slider - Bottom Centered - Increased padding on mobile for better visibility */}
-      <div className="absolute bottom-0 left-0 right-0 z-50 flex justify-center px-5 pb-20 sm:pb-8 lg:pb-12">
+      {/* Slider - Bottom Centered - Increased padding on mobile for Android bottom bar */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 z-50 flex justify-center px-5 sm:pb-8 lg:pb-12"
+        style={{
+          paddingBottom: 'clamp(7rem, env(safe-area-inset-bottom, 0px) + 7rem, 10rem)',
+        }}
+      >
         <div className="w-full max-w-[90%] sm:max-w-[85%] lg:max-w-[80%]">
           <Slider
             value={sliderValue}

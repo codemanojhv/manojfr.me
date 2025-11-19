@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Manoj - Student • Maker • Tech Explorer',
     description: 'Still in college. Still figuring life. Building shit. Breaking shit. Fixing shit again.',
-    type: 'website',
+    type: 'website', 
   },
   twitter: {
     card: 'summary_large_image',
@@ -26,13 +26,20 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover' as const, // Supports safe-area-inset for notched devices
+}
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark">   
       <body className={`${inter.variable} font-sans antialiased`}>
         {children}
       </body>

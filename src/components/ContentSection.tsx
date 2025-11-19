@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect, useMemo, useRef } from "react"
+import { Illustrations } from "@/components/Illustrations"
 
 interface ContentSectionProps {
   text: string
@@ -35,6 +36,36 @@ function isEmojiToken(token: string) {
     const code = char.codePointAt(0)
     return code !== undefined && code >= 0x1f000
   })
+}
+
+function getIllustration(token: string) {
+  const map: Record<string, React.ComponentType<{ className?: string }>> = {
+    '🧍': Illustrations.Person,
+    '🚀': Illustrations.Rocket,
+    '💀': Illustrations.Skull,
+    '⚡': Illustrations.Lightning,
+    '🎨': Illustrations.Art,
+    '💻': Illustrations.Code,
+    '🖌️': Illustrations.Art,
+    '✍️': Illustrations.Art,
+    '🎮': Illustrations.Gaming,
+    '🧠': Illustrations.Brain,
+    '🔥': Illustrations.Fire,
+    '🪐': Illustrations.Planet,
+    '⚫': Illustrations.BlackHole,
+    '🔊': Illustrations.Sound,
+    '✨': Illustrations.Stars,
+    '☠️': Illustrations.Dead,
+    '🧭': Illustrations.Compass,
+  }
+
+  // Find the first emoji match
+  for (const [emoji, Component] of Object.entries(map)) {
+    if (token.includes(emoji)) {
+      return Component
+    }
+  }
+  return null
 }
 
 // Named color mappings for easy customization
@@ -118,38 +149,71 @@ function parseHighlight(highlightText: string): { text: string; bgColor: string;
   return { text: textPart, bgColor, isTailwind: false }
 }
 
-// Hover Preview Component
+// Hover Preview Component with image preview
 function HoverPreview({ 
   text, 
   color, 
-  x, 
-  y 
+  mouseX, 
+  mouseY 
 }: { 
   text: string
   color: string
-  x: number
-  y: number 
+  mouseX: number
+  mouseY: number 
 }) {
   const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
   const r = rgbaMatch ? rgbaMatch[1] : '255'
   const g = rgbaMatch ? rgbaMatch[2] : '255'
   const b = rgbaMatch ? rgbaMatch[3] : '255'
 
+  // Position preview near cursor (2cm above cursor)
+  // 2cm ≈ 75.6px at 96 DPI, using 76px for consistency
+  const offsetX = 15
+  const offsetY = -76 // 2cm above cursor
+  
+  // Get image path based on text (you can customize this mapping)
+  const getImagePath = (text: string): string | null => {    
+    const imageMap: Record<string, string> = {
+      'CHAOS': '/media/chaos.svg',
+      'CO-PILOT': '/media/copilot.svg',
+      'FIGHTS GODS IN HIS HEAD': '/media/mind.svg',
+      'STOLEN FROM ALTERNATE TIMELINES': '/media/projects.svg',
+      'TECH NECROMANCER': '/media/code.svg',
+      'VIOLENTLY ALIVE': '/media/alive.svg',
+      'UNIVERSE': '/media/universe.svg',
+      'BLACK HOLES': '/media/universe.svg',
+      'FAILURES': '/media/learn.svg',
+      'MAGIC': '/media/magic.svg',
+    }
+    return imageMap[text.toUpperCase()] || null
+  }
+
+  const imagePath = getImagePath(text)
+
   return (
     <motion.div
       className="fixed pointer-events-none z-50"
-      initial={{ opacity: 0, scale: 0.8, y: y - 20 }}
-      animate={{ opacity: 1, scale: 1, y: y - 10 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      initial={{ opacity: 0, scale: 0.7, y: mouseY + offsetY - 10 }}
+      animate={{ 
+        opacity: 1, 
+        scale: 1, 
+        x: mouseX + offsetX,
+        y: mouseY + offsetY
+      }}
+      exit={{ opacity: 0, scale: 0.7 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 400, 
+        damping: 25,
+        mass: 0.5,
+        bounce: 0.3
+      }}
       style={{
-        left: `${x}px`,
-        top: `${y}px`,
-        transform: 'translateX(-50%)', // Center horizontally relative to x position
+        transformOrigin: 'top left',
       }}
     >
       <div
-        className="px-4 py-3 rounded-2xl backdrop-blur-2xl border shadow-2xl min-w-[200px]"
+        className="rounded-2xl backdrop-blur-2xl border shadow-2xl overflow-hidden w-[280px]"
         style={{
           backgroundColor: `rgba(${r}, ${g}, ${b}, 0.15)`,
           backdropFilter: 'blur(24px) saturate(200%)',
@@ -158,12 +222,53 @@ function HoverPreview({
           boxShadow: `0 20px 60px 0 rgba(${r}, ${g}, ${b}, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)`,
         }}
       >
-        <p className="text-white text-sm font-medium uppercase tracking-wide">
-          {text}
-        </p>
-        <p className="text-white/60 text-xs mt-1">
-          Click to explore →
-        </p>
+        {/* Image Preview Area */}
+        {imagePath && (
+          <div className="w-full h-32 bg-gradient-to-br from-white/10 to-transparent relative overflow-hidden">
+            <motion.div
+              initial={{ scale: 1.1, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+              className="w-full h-full"
+            >
+              <Image
+                src={imagePath}
+                alt={text}
+                width={280}
+                height={128}
+                className="w-full h-full object-cover"
+                unoptimized
+                onError={(e) => {
+                  // Hide image container if image doesn't exist
+                  const container = e.currentTarget.closest('div')
+                  if (container) {
+                    container.style.display = 'none'
+                  }
+                }}
+              />
+            </motion.div>
+          </div>
+        )}
+        
+        {/* Text Content */}
+        <div className="px-4 py-3">
+          <p className="text-white text-sm font-medium uppercase tracking-wide">
+            {text}
+          </p>
+          <p className="text-white/60 text-xs mt-1 flex items-center gap-1">
+            <span>Click to explore</span>
+            <motion.span
+              animate={{ x: [0, 4, 0] }}
+              transition={{ 
+                repeat: Infinity, 
+                duration: 1.5,
+                ease: "easeInOut"
+              }}
+            >
+              →
+            </motion.span>
+          </p>
+        </div>
       </div>
     </motion.div>
   )
@@ -174,21 +279,28 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
   const [previewPosition, setPreviewPosition] = useState<{ x: number; y: number } | null>(null)
   const [previewText, setPreviewText] = useState<string>("")
   const [previewColor, setPreviewColor] = useState<string>("rgba(255, 255, 255, 1)")
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [windowWidth, setWindowWidth] = useState(1200) // Use consistent initial value
   const [isMounted, setIsMounted] = useState(false)
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Track window width for responsive calculations (only on client after mount)
+  // Track window width and mouse position for responsive calculations
   useEffect(() => {
     setIsMounted(true)
     const updateWidth = () => {
       setWindowWidth(window.innerWidth)
     }
 
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY })
+    }
+
     updateWidth()
     window.addEventListener("resize", updateWidth)
+    window.addEventListener("mousemove", handleMouseMove)
     return () => {
       window.removeEventListener("resize", updateWidth)
+      window.removeEventListener("mousemove", handleMouseMove)
       // Clean up hover timeout on unmount
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current)
@@ -374,8 +486,8 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
           <HoverPreview
             text={previewText}
             color={previewColor}
-            x={previewPosition.x}
-            y={previewPosition.y}
+            mouseX={mousePosition.x}
+            mouseY={mousePosition.y}
           />
         )}
       </AnimatePresence>
@@ -407,11 +519,46 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
             return null
           }
 
+          // Only track hover for images, emojis, and highlights
+          const isImage = isImageToken(word)
+          const isEmoji = isEmojiToken(word)
+          const isHighlight = word.startsWith("==") && word.endsWith("==")
+          const isInteractive = isImage || isEmoji || isHighlight
+          
           const isHovered = hoveredIndex === uniqueId
+          // Dim ALL elements (including regular text) when hovering over any interactive element
           const isDimmed = hoveredIndex !== null && !isHovered
 
-          if (isImageToken(word)) {
+          if (isImage) {
             const src = word.startsWith("/") ? word : `/media/${word}`
+            const isProfile = word.includes("manoj.png")
+
+            if (isProfile) {
+              return (
+                <motion.span
+                  key={uniqueId}
+                  className="inline-flex items-center justify-center align-middle mx-1"
+                  initial={{ scale: 0, opacity: 0, rotate: -20 }}
+                  animate={{
+                    scale: isHovered ? 1.2 : 1,
+                    opacity: isDimmed ? 0.2 : 1,
+                    rotate: isHovered ? 5 : 0,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  onMouseEnter={() => setHoveredIndex(uniqueId)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <Image
+                    src={src}
+                    alt={word}
+                    width={100}
+                    height={100}
+                    className="h-12 w-auto sm:h-16 lg:h-[4.5vw] object-contain hover:scale-110 transition-transform duration-300" 
+                  />
+                </motion.span>
+              )
+            }
+
             return (
               <motion.span
                 key={uniqueId}
@@ -436,7 +583,29 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
             )
           }
 
-          if (isEmojiToken(word)) {
+          if (isEmoji) {
+            const Illustration = getIllustration(word)
+            
+            if (Illustration) {
+              return (
+                <motion.span
+                  key={uniqueId}
+                  className="inline-flex items-center justify-center align-text-bottom"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{
+                    scale: isHovered ? 1.2 : 1,
+                    opacity: isDimmed ? 0.2 : 1,
+                    rotate: isHovered ? 10 : 0,
+                  }}
+                  transition={{ type: "spring", stiffness: 520, damping: 24 }}
+                  onMouseEnter={() => setHoveredIndex(uniqueId)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <Illustration className="h-6 w-6 sm:h-8 sm:w-8 lg:h-[2vw] lg:w-[2vw]" />
+                </motion.span>
+              )
+            }
+
             return (
               <motion.span
                 key={uniqueId}
@@ -457,7 +626,6 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
 
           // Check if word should be bold (starts with **) or highlighted (starts with ==)
           const isBold = word.startsWith("**") && word.endsWith("**")
-          const isHighlight = word.startsWith("==") && word.endsWith("==")
           
           let displayWord: string
           let highlightStyle: React.CSSProperties = {}
@@ -531,33 +699,27 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
           const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
             setHoveredIndex(uniqueId)
             if (isClickable && isHighlight && parsed) {
+              // Update mouse position immediately
+              setMousePosition({ x: e.clientX, y: e.clientY })
               // Clear any existing timeout
               if (hoverTimeoutRef.current) {
                 clearTimeout(hoverTimeoutRef.current)
               }
-              // Store element reference before setTimeout
-              const targetElement = e.currentTarget
               // Show preview after a short delay
               hoverTimeoutRef.current = setTimeout(() => {
-                // Check if element still exists and is mounted
-                if (!targetElement || !document.contains(targetElement)) {
-                  return
-                }
-                try {
-                  const rect = targetElement.getBoundingClientRect()
-                  if (rect) {
-                    setPreviewPosition({
-                      x: rect.left + rect.width / 2, // Center horizontally
-                      y: rect.top - 60 // Position above the word
-                    })
-                    setPreviewText(displayWord)
-                    setPreviewColor(parsed.bgColor)
-                  }
-                } catch (error) {
-                  // Silently fail if element is no longer available
-                  console.warn('Could not get bounding rect for preview:', error)
-                }
-              }, 300)
+                setPreviewPosition({ x: e.clientX, y: e.clientY })
+                setPreviewText(displayWord)
+                setPreviewColor(parsed.bgColor)
+              }, 200)
+            }
+          }
+
+          const handleMouseMove = (e: React.MouseEvent<HTMLSpanElement>) => {
+            if (isClickable && isHighlight && hoveredIndex === uniqueId) {
+              setMousePosition({ x: e.clientX, y: e.clientY })
+              if (previewPosition) {
+                setPreviewPosition({ x: e.clientX, y: e.clientY })
+              }
             }
           }
 
@@ -575,25 +737,42 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
             }
           }
 
+          // Only add hover handlers and effects for highlighted text
+          if (isHighlight) {
+            return (
+              <motion.span
+                key={uniqueId}
+                className={`inline-block transition-all duration-300 ${
+                  isBold ? "font-bold" : ""
+                } ${highlightClassName} ${isClickable ? "hover:scale-105" : ""}`}
+                style={{ 
+                  opacity: isDimmed ? 0.2 : 1,
+                  ...highlightStyle,
+                  ...hoverStyle
+                }}
+                onMouseEnter={handleMouseEnter}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                onClick={handleClick}
+                whileHover={isClickable ? { scale: 1.05, y: -2 } : {}}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                {displayWord}
+              </motion.span>
+            )
+          }
+          
+          // Regular text - no hover effects but can be dimmed
           return (
-            <motion.span
+            <span
               key={uniqueId}
-              className={`inline-block transition-all duration-300 ${
-                isBold ? "font-bold" : ""
-              } ${highlightClassName} ${isClickable ? "hover:scale-105" : ""}`}
-              style={{ 
+              className={`inline-block transition-opacity duration-300 ${isBold ? "font-bold" : ""}`}
+              style={{
                 opacity: isDimmed ? 0.2 : 1,
-                ...highlightStyle,
-                ...hoverStyle
               }}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-              onClick={handleClick}
-              whileHover={isClickable ? { scale: 1.05, y: -2 } : {}}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
               {displayWord}
-            </motion.span>
+            </span>
           )
         })}
       </p>
@@ -601,4 +780,3 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
     </>
   )
 }
-

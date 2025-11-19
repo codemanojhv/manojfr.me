@@ -1,0 +1,7 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#1a1a1a"/>
+  <circle cx="200" cy="150" r="100" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4 4"/>
+  <circle cx="200" cy="150" r="60" stroke="#F59E0B" stroke-width="1"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="monospace" font-size="24">UNIVERSE</text>
+</svg>
+

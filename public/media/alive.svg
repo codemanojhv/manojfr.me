@@ -1,0 +1,6 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#1a1a1a"/>
+  <path d="M200 50L230 140H320L250 190L280 280L200 220L120 280L150 190L80 140H170L200 50Z" stroke="#EF4444" stroke-width="2"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="monospace" font-size="24">ALIVE</text>
+</svg>
+

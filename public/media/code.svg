@@ -1,0 +1,8 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#1a1a1a"/>
+  <text x="50" y="100" fill="#EC4899" font-family="monospace" font-size="14">&lt;code&gt;</text>
+  <text x="70" y="130" fill="#EC4899" font-family="monospace" font-size="14" opacity="0.7">  is_alive = true;</text>
+  <text x="50" y="160" fill="#EC4899" font-family="monospace" font-size="14">&lt;/code&gt;</text>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="monospace" font-size="24" opacity="0.1">CODE</text>
+</svg>
+

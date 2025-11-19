@@ -1,0 +1,8 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#1a1a1a"/>
+  <circle cx="150" cy="150" r="40" stroke="#06B6D4" stroke-width="2"/>
+  <circle cx="250" cy="150" r="40" stroke="#06B6D4" stroke-width="2"/>
+  <path d="M150 190 Q200 220 250 190" stroke="#06B6D4" stroke-width="2"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="monospace" font-size="24" opacity="0.1">CO-PILOT</text>
+</svg>
+
