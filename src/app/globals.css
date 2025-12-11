@@ -35,9 +35,11 @@ html,
 body {
   overflow: hidden;
   height: 100vh;
-  height: 100dvh; /* Dynamic viewport height for mobile */
+  height: 100dvh;
+  /* Dynamic viewport height for mobile */
   width: 100vw;
-  width: 100dvw; /* Dynamic viewport width for mobile */
+  width: 100dvw;
+  /* Dynamic viewport width for mobile */
 }
 
 /* Hide scrollbar */
@@ -50,3 +52,7 @@ body {
   scrollbar-width: none;
 }
 
+::selection {
+  background: rgba(168, 85, 247, 0.3);
+  color: white;
+}

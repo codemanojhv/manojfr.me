@@ -29,7 +29,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['var(--font-outfit)', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
       },
       letterSpacing: {
         tighter: '-0.02em',
