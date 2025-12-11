@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect, useMemo, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { HoverPreview } from "@/components/HoverPreview"
 import {
   isImageToken,
@@ -18,6 +19,7 @@ interface ContentSectionProps {
 }
 
 export function ContentSection({ text, sliderValue }: ContentSectionProps) {
+  const router = useRouter()
   const [hoveredIndex, setHoveredIndex] = useState<string | null>(null)
   const [previewPosition, setPreviewPosition] = useState<{ x: number; y: number } | null>(null)
   const [previewText, setPreviewText] = useState<string>("")
@@ -499,7 +501,11 @@ export function ContentSection({ text, sliderValue }: ContentSectionProps) {
 
             const handleClick = () => {
               if (isClickable && clickableUrl) {
-                window.open(clickableUrl, '_blank')
+                if (clickableUrl.startsWith('/')) {
+                  router.push(clickableUrl)
+                } else {
+                  window.open(clickableUrl, '_blank')
+                }
               }
             }
 
