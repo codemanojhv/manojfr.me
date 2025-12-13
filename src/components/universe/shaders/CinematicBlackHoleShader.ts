@@ -12,6 +12,7 @@ const CinematicBlackHoleMaterial = shaderMaterial(
         uColor: new THREE.Color("#ff6600"),
         uDensity: 1.0, // Multiplier for disk density
         uSpin: 1.0, // Multiplier for rotation speed
+        uJetIntensity: 0.0, // Intensity of relativistic jets
     },
     // Vertex Shader
     `
@@ -28,11 +29,13 @@ const CinematicBlackHoleMaterial = shaderMaterial(
     uniform vec3 uColor;
     uniform float uDensity;
     uniform float uSpin;
+    uniform float uJetIntensity; // New Uniform
+    
     varying vec3 vPosition;
     
     // ULTRA QUALITY SETTINGS
-    #define MAX_STEPS 300       // 2.5x standard
-    #define STEP_SIZE 0.08      // Finer steps
+    #define MAX_STEPS 350       
+    #define STEP_SIZE 0.05      
     #define MAX_DIST 60.0
     
     // Noise functions
@@ -52,8 +55,8 @@ const CinematicBlackHoleMaterial = shaderMaterial(
     float fbm(vec3 p) {
         float f = 0.0;
         float amp = 0.5;
-        // 4 Octaves
-        for(int i=0; i<4; i++) {
+        // 5 Octaves for richer detail
+        for(int i=0; i<5; i++) {
             f += amp * noise(p);
             p = p * 2.02;
             amp *= 0.5;
@@ -74,7 +77,7 @@ const CinematicBlackHoleMaterial = shaderMaterial(
         // Ray Jump Optimization
         float startDist = 0.0;
         float distToCenter = length(ro);
-        float volumeRadius = 14.0; 
+        float volumeRadius = 18.0; 
         
         if (distToCenter > volumeRadius) {
             float b = dot(ro, rd);
@@ -89,9 +92,12 @@ const CinematicBlackHoleMaterial = shaderMaterial(
         vec3 curPos = ro + rd * startDist;
         
         float eventHorizonRadius = 1.0;
-        float diskInner = 1.4;
-        float diskOuter = 6.5; // Larger disk
-        float diskHeight = 0.3;
+        // Photon ring is slightly larger than EH
+        float photonRingRadius = 1.5; 
+        
+        float diskInner = 1.6;
+        float diskOuter = 8.0; 
+        float diskHeight = 0.35;
         
         for(int i=0; i<MAX_STEPS; i++) {
             float d = length(curPos);
@@ -103,23 +109,53 @@ const CinematicBlackHoleMaterial = shaderMaterial(
                 break;
             }
             
-            // Gravity bending (Stronger for visual drama)
+            // Gravity bending
             float force = 1.5 / (d * d + 0.05);
             vec3 toCenter = normalize(-curPos);
-            rd = normalize(rd + toCenter * force * (STEP_SIZE * 0.8));
+            // Stronger bending closer to BH
+            rd = normalize(rd + toCenter * force * STEP_SIZE);
             
-            // Accretion Disk
+            // --- Photon Ring ---
+            // A thin shell of trapped light
+            float distToPhotonRing = abs(d - photonRingRadius);
+            if(distToPhotonRing < 0.05) {
+                float intensity = exp(-distToPhotonRing * 20.0) * 0.2;
+                col.rgb += vec3(1.0, 0.9, 0.8) * intensity;
+                col.a += intensity * 0.5;
+            }
+
+            // --- Relativistic Jets ---
+            // Vertical beams along Y axis
+            if(uJetIntensity > 0.0) {
+                 float rCyl = length(curPos.xz);
+                 // Cone shape narrowing at origin
+                 if(rCyl < (abs(curPos.y) * 0.15 + 0.5) && abs(curPos.y) > 2.0) {
+                     float jetNoise = fbm(curPos * 0.5 + vec3(0, time * 5.0, 0));
+                     float jetFalloff = smoothstep(15.0, 2.0, abs(curPos.y));
+                     float jetCore = smoothstep(1.0, 0.0, rCyl);
+                     float jetVal = jetNoise * jetFalloff * jetCore * uJetIntensity * 0.02;
+                     col.rgb += uColor * jetVal * 2.0; 
+                     col.a += jetVal;
+                 }
+            }
+            
+            // --- Accretion Disk ---
             if(abs(curPos.y) < diskHeight) {
                 float r = length(curPos.xz);
                 if(r > diskInner && r < diskOuter) {
                     vec3 samplePos = curPos;
                     // Spin
-                    float rotSpeed = time * uSpin * (3.5 / (r+0.1)); 
+                    float rotSpeed = time * uSpin * (4.0 / (r+0.1)); 
                     samplePos.xz *= rot2D(rotSpeed);
                     
                     // Detail Noise
-                    float dens = fbm(samplePos * 2.0 + vec3(0, time * uSpin * 0.5, 0));
+                    float dens = fbm(samplePos * 2.5 + vec3(0, time * uSpin * 0.5, 0));
                     
+                    // Add more turbulence near inner edge
+                    if (r < diskInner + 1.0) {
+                        dens += fbm(samplePos * 8.0 - vec3(0, time * 2.0, 0)) * 0.5;
+                    }
+
                     float radialFade = smoothstep(diskOuter, diskOuter-2.0, r) * smoothstep(diskInner, diskInner+0.3, r);
                     float verticalFade = 1.0 - smoothstep(0.0, diskHeight, abs(curPos.y));
                     
@@ -128,15 +164,17 @@ const CinematicBlackHoleMaterial = shaderMaterial(
                     // Doppler
                     vec3 velocity = normalize(vec3(-curPos.z, 0.0, curPos.x)); 
                     float viewDot = dot(rd, velocity);
-                    float doppler = 1.0 - viewDot * 0.7; // Strong doppler
+                    float doppler = 1.0 - viewDot * 0.6; 
                     
-                    vec3 hotColor = vec3(0.9, 0.95, 1.0);
+                    vec3 hotColor = vec3(0.95, 0.98, 1.0);
                     vec3 userCol = uColor;
-                    vec3 localCol = mix(userCol, hotColor, finalDensity * doppler * doppler);
                     
-                    float alphaStep = finalDensity * 0.15;
-                    // Additive empyreal glow
-                    col.rgb += localCol * alphaStep * doppler * 2.5 * (1.0 - col.a * 0.8);
+                    // Color shift based on density (temperature)
+                    vec3 localCol = mix(userCol, hotColor, clamp(finalDensity * 1.5 * doppler, 0.0, 1.0));
+                    
+                    float alphaStep = finalDensity * 0.12;
+                    // Additive glow
+                    col.rgb += localCol * alphaStep * doppler * 3.0 * (1.0 - col.a * 0.9);
                     col.a += alphaStep;
                 }
             }
@@ -147,14 +185,13 @@ const CinematicBlackHoleMaterial = shaderMaterial(
             if(d > volumeRadius + 2.0) break; 
         }
 
-        // Star Lensing
+        // Star Lensing / Background
         if(col.a < 1.0) {
             vec3 starDir = normalize(rd);
             float s = pow(hash(dot(starDir, vec3(12.3, 45.6, 78.9))), 500.0);
             
-            // High quality nebula background
             float neb = fbm(starDir * 1.5);
-            vec3 bgCol = vec3(0.01, 0.01, 0.03) * neb; // Dark blue space
+            vec3 bgCol = vec3(0.005, 0.005, 0.02) * neb; 
             bgCol += vec3(s);
             
             col.rgb += bgCol * (1.0 - col.a);
@@ -162,7 +199,7 @@ const CinematicBlackHoleMaterial = shaderMaterial(
         }
         
         gl_FragColor = col;
-        // ACES Tone mapping for cinematic look
+        // ACES Tone mapping
         gl_FragColor.rgb = (gl_FragColor.rgb * (2.51 * gl_FragColor.rgb + 0.03)) / (gl_FragColor.rgb * (2.43 * gl_FragColor.rgb + 0.59) + 0.14);
     }
   `

@@ -9,7 +9,7 @@ import * as THREE from "three";
 import "./shaders/CinematicBlackHoleShader";
 import { BLACK_HOLE_PRESETS, BlackHolePreset } from "../../data/blackHoles";
 
-function CinematicBlackHole({ color, density, spin, scale }: { color: string, density: number, spin: number, scale: number }) {
+function CinematicBlackHole({ color, density, spin, scale, jetIntensity }: { color: string, density: number, spin: number, scale: number, jetIntensity: number }) {
     const meshRef = useRef<any>();
     const materialRef = useRef<any>();
     const { camera } = useThree();
@@ -34,6 +34,7 @@ function CinematicBlackHole({ color, density, spin, scale }: { color: string, de
             // Lerp floats
             materialRef.current.uDensity = THREE.MathUtils.lerp(materialRef.current.uDensity, density, delta * 2);
             materialRef.current.uSpin = THREE.MathUtils.lerp(materialRef.current.uSpin, spin, delta * 2);
+            materialRef.current.uJetIntensity = THREE.MathUtils.lerp(materialRef.current.uJetIntensity, jetIntensity, delta * 2);
 
             // Smooth Scale Transition
             targetScale.current = scale;
@@ -71,7 +72,8 @@ export default function BlackHoleScene() {
         density: 1.2,
         spin: 1.0,
         bloom: 1.5,
-        scale: 1.0
+        scale: 1.0,
+        jetIntensity: 0.0
     });
 
     // When selection changes, update params
@@ -84,7 +86,8 @@ export default function BlackHoleScene() {
                 density: preset.density,
                 spin: preset.spin,
                 bloom: preset.bloom,
-                scale: preset.scale
+                scale: preset.scale,
+                jetIntensity: 0.0 // Reset jets on preset change, or add to preset if desired
             });
         }
     };
@@ -103,7 +106,8 @@ export default function BlackHoleScene() {
                         color={params.color}
                         density={params.density}
                         spin={params.spin}
-                        scale={params.scale} // Pass scale
+                        scale={params.scale}
+                        jetIntensity={params.jetIntensity}
                     />
                 </Suspense>
 
@@ -117,7 +121,7 @@ export default function BlackHoleScene() {
                         levels={8}
                         mipmapBlur
                     />
-                    <ChromaticAberration offset={[0.002, 0.002]} blendFunction={BlendFunction.NORMAL} radialModulation={true} modulationOffset={0.5} />
+                    <ChromaticAberration offset={new THREE.Vector2(0.002, 0.002)} blendFunction={BlendFunction.NORMAL} radialModulation={true} modulationOffset={0.5} />
                     <Noise opacity={0.06} />
                     <Vignette eskil={false} offset={0.1} darkness={1.1} />
                 </EffectComposer>
@@ -131,8 +135,8 @@ export default function BlackHoleScene() {
                         key={p.id}
                         onClick={() => handleSelect(p.id)}
                         className={`text-left px-4 py-3 rounded-lg border backdrop-blur-md transition-all group ${selectedId === p.id
-                                ? 'bg-white/10 border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.2)] scale-105'
-                                : 'bg-black/40 border-white/10 hover:bg-white/5 hover:border-white/30 hover:scale-105'
+                            ? 'bg-white/10 border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.2)] scale-105'
+                            : 'bg-black/40 border-white/10 hover:bg-white/5 hover:border-white/30 hover:scale-105'
                             }`}
                     >
                         <div className="flex justify-between items-center mb-1">
@@ -199,6 +203,19 @@ export default function BlackHoleScene() {
                             type="range" min="0.0" max="5.0" step="0.1"
                             value={params.spin}
                             onChange={(e) => setParams(p => ({ ...p, spin: parseFloat(e.target.value) }))}
+                            className="w-full accent-white h-1 bg-white/20 rounded-full appearance-none cursor-pointer"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block mb-2 font-mono uppercase text-white/70 flex justify-between">
+                            <span>Jet Intensity</span>
+                            <span>{params.jetIntensity.toFixed(1)}</span>
+                        </label>
+                        <input
+                            type="range" min="0.0" max="2.0" step="0.1"
+                            value={params.jetIntensity}
+                            onChange={(e) => setParams(p => ({ ...p, jetIntensity: parseFloat(e.target.value) }))}
                             className="w-full accent-white h-1 bg-white/20 rounded-full appearance-none cursor-pointer"
                         />
                     </div>
