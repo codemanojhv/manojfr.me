@@ -10,19 +10,19 @@ const outfit = Outfit({
 })
 
 export const metadata: Metadata = {
-  title: 'Manoj - Student • Maker • Tech Explorer',
-  description: 'Still in college. Still figuring life. Building shit. Breaking shit. Fixing shit again.',
-  keywords: 'Manoj, Student, Maker, Tech Explorer, Designer, Developer, Builder',
+  title: 'Cosmic Explorer - Universe & Black Hole Simulations',
+  description: 'Interactive 3D simulations of the cosmos. Explore the universe and witness the power of black holes.',
+  keywords: 'universe, black hole, 3D simulation, cosmos, space, WebGL, Three.js',
   authors: [{ name: 'Manoj' }],
   openGraph: {
-    title: 'Manoj - Student • Maker • Tech Explorer',
-    description: 'Still in college. Still figuring life. Building shit. Breaking shit. Fixing shit again.',
+    title: 'Cosmic Explorer - Universe & Black Hole Simulations',
+    description: 'Interactive 3D simulations of the cosmos. Explore the universe and witness the power of black holes.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Manoj - Student • Maker • Tech Explorer',
-    description: 'Still in college. Still figuring life. Building shit. Breaking shit. Fixing shit again.',
+    title: 'Cosmic Explorer - Universe & Black Hole Simulations',
+    description: 'Interactive 3D simulations of the cosmos. Explore the universe and witness the power of black holes.',
   },
 }
 

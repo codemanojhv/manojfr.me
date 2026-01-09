@@ -1,23 +1,23 @@
-# Manoj's Portfolio
+# Cosmic Explorer
 
-A minimalist, single-page portfolio website with a slider-controlled narrative reveal experience.
+Interactive 3D simulations of the cosmos featuring a universe explorer and black hole visualization.
 
 ## Features
 
-- **Slider-controlled content reveal**: Navigate through the narrative using a horizontal slider (RTL direction)
-- **Word-by-word animations**: Text appears word-by-word as you move through each section
-- **Smooth, cinematic transitions**: Opacity and subtle Y-translation animations
-- **Responsive design**: Optimized for mobile and desktop
-- **Modern tech stack**: Next.js 14, React, TypeScript, Tailwind CSS, Framer Motion
+- **Universe Explorer**: Navigate through a 3D starfield with galaxies, solar systems, and planets
+- **Black Hole Simulation**: Cinematic visualization of black holes with customizable physics parameters
+- **WebGL/Three.js**: Built with React Three Fiber for high-performance 3D rendering
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Modern Tech Stack**: Next.js 14, React, TypeScript, Tailwind CSS
 
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
+- **3D Library**: Three.js with React Three Fiber, Drei, and Postprocessing
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
-- **UI Components**: Radix UI (Slider)
-- **Fonts**: Inter (with Helvetica Neue fallback)
+- **Shaders**: Custom GLSL shaders for black hole effects
 
 ## Getting Started
 
@@ -52,36 +52,57 @@ npm start
 ```
 src/
 ├── app/
-│   ├── layout.tsx      # Root layout with metadata
-│   ├── page.tsx        # Main page component
-│   └── globals.css     # Global styles
+│   ├── layout.tsx           # Root layout with metadata
+│   ├── page.tsx             # Home page with navigation to simulations
+│   ├── universe/
+│   │   └── page.tsx         # Universe simulation page
+│   ├── blackhole/
+│   │   └── page.tsx         # Black hole simulation page
+│   └── globals.css          # Global styles
 ├── components/
-│   ├── Navigation.tsx       # Top-right navigation links
-│   ├── ContentSection.tsx   # Individual content section with animations
-│   └── ui/
-│       └── slider.tsx       # Slider component (Radix UI wrapper)
+│   └── universe/
+│       ├── UniverseScene.tsx       # Main universe scene
+│       ├── BlackHoleScene.tsx      # Main black hole scene
+│       ├── StarField.tsx           # Star particle system
+│       ├── Galaxy.tsx              # Galaxy component
+│       ├── StarSystem.tsx          # Solar system component
+│       ├── Planet.tsx              # Planet component
+│       ├── BlackHole.tsx           # Black hole component
+│       ├── HUD.tsx                 # UI overlay for universe
+│       └── shaders/                # Custom GLSL shaders
+├── data/
+│   └── blackHoles.ts        # Black hole presets and data
 └── lib/
-    └── utils.ts        # Utility functions
+    └── utils.ts             # Utility functions
 ```
+
+## Features
+
+### Universe Simulation
+- Interactive camera controls
+- Procedurally generated star systems
+- Multiple galaxies to explore
+- Planet details and information HUD
+- Teleportation between systems
+- User position marker
+
+### Black Hole Simulation
+- Multiple black hole presets (Sagittarius A*, M87, Gargantua, etc.)
+- Real-time physics parameter adjustments
+- Custom GLSL shaders for gravitational lensing
+- Accretion disk visualization
+- Cinematic camera controls
 
 ## Customization
 
-### Content
+### Adding New Black Hole Presets
 
-Edit the `contentSections` array in `src/app/page.tsx` to modify the narrative content.
+Edit `src/data/blackHoles.ts` to add new black hole configurations with custom parameters.
 
 ### Colors
 
-Update the color scheme in `tailwind.config.js`:
-- Background: `#000000`
-- Foreground: `#FFFFFF`
-- Accent: `#A855F7` (Purple)
-
-### Fonts
-
-The site uses Inter font by default. To change fonts, update `src/app/layout.tsx` and the font configuration in `tailwind.config.js`.
+Update the color scheme in `tailwind.config.js` and component files as needed.
 
 ## License
 
 MIT
-
