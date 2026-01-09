@@ -6,6 +6,8 @@ import { Slider } from "@/components/ui/slider"
 import { Navigation } from "@/components/Navigation"
 import { ContentSection } from "@/components/ContentSection"
 import { BackgroundEffect } from "@/components/BackgroundEffect"
+import { UnicornHero } from "@/components/UnicornHero"
+import { HeroNavigation } from "@/components/HeroNavigation"
 
 const narrativeText = `HI, I'M MANOJ manoj.png ,
 
@@ -72,6 +74,14 @@ export default function Home() {
 
   return (
     <main className="relative h-screen h-dvh w-screen w-dvw overflow-hidden bg-black">
+      {/* UnicornStudio Hero Background */}
+      <div className="absolute inset-0 z-0">
+        <UnicornHero />
+      </div>
+
+      {/* Hero Navigation - Top Right */}
+      <HeroNavigation />
+
       <BackgroundEffect />
       <Navigation />
       
