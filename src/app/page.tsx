@@ -1,108 +1,53 @@
 "use client"
 
-import { useState } from "react"
+import Link from "next/link"
 import { motion } from "framer-motion"
-import { Slider } from "@/components/ui/slider"
-import { Navigation } from "@/components/Navigation"
-import { ContentSection } from "@/components/ContentSection"
-import { BackgroundEffect } from "@/components/BackgroundEffect"
-
-const narrativeText = `HI, I'M MANOJ manoj.png ,
-
-THE DUDE IN COLLEGE WHO LOOKS LIKE HE'S FREESTYLING LIFE
-
-BUT LOWKEY ==purple:FIGHTS GODS IN HIS HEAD== .
-
-==red:CHAOS== ISN'T AN ACCIDENT,
-
-IT'S THE ==cyan:CO-PILOT== 🚀 .
-
-BUILDS THINGS THAT FEEL ==cyan:STOLEN FROM ALTERNATE TIMELINES== .
-
-BREAKS THEM FOR FUN.
-
-RESURRECTS THEM LIKE A ==violet:TECH NECROMANCER== 💀⚡ .
-
-DESIGNING 🎨.
-
-CODING 💻.
-
-PAINTING 🖌️.  
-
-  WRITING ✍️.
-
-GAMING 🎮.
-
-WHATEVER THE BRAIN DEMANDS THAT DAY 🧠.
-
-PEOPLE CALL IT "LACK OF FOCUS",
-
-BUT IT LOOKS MORE LIKE BEING ==red:VIOLENTLY ALIVE== 🔥.
-
-THE ==purple:UNIVERSE== GETS STARED AT.
- 
-LIKE IT'S HIDING ANSWERS 🪐.
-
-==purple:BLACK HOLES== STILL MAKE MORE SENSE THAN HUMANS ⚫.  
-
-==orange:FAILURES== GET MADE LOUDLY 🔊.  
-
-LESSONS GET ABSORBED QUICK.
-
-AND WORLDS GET BUILT THAT NEVER EXISTED BEFORE ✨.
-
-LIFE HAS TWO MODES:
-
-**NPC OR SUFFER.**
-
-THE CHOICE? SUFFERING.
-
-BECAUSE THAT'S WHERE THE MAGIC HIDES ☠️
-
-==red:F*CK== NORMAL
-
-I WANT ==purple:MAGIC== ✨`
 
 export default function Home() {
-  const [sliderValue, setSliderValue] = useState([0])
-
-  const handleSliderChange = (value: number[]) => {
-    setSliderValue(value)
-  }
-
   return (
-    <main className="relative h-screen h-dvh w-screen w-dvw overflow-hidden bg-black">
-      <BackgroundEffect />
-      <Navigation />
-      
-      {/* Content Sections - Full width, centered like anikjain.com */}
-      <div className="absolute inset-0 flex items-center justify-center pb-32 overflow-hidden z-10">
-        <div className="w-full flex flex-col justify-center">
-          <ContentSection text={narrativeText} sliderValue={sliderValue[0]} />
-        </div>
+    <main className="relative h-screen w-screen overflow-hidden bg-black text-white flex items-center justify-center">
+      <div className="z-10 flex flex-col items-center gap-8">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-center"
+        >
+          Explore the Cosmos
+        </motion.h1>
+        
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="flex flex-col sm:flex-row gap-6"
+        >
+          <Link href="/universe">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 bg-purple-600/20 border border-purple-500/50 rounded-lg backdrop-blur-sm hover:bg-purple-600/30 transition-all duration-300 text-center"
+            >
+              <div className="text-xl font-semibold">Universe</div>
+              <div className="text-sm text-white/70 mt-1">Explore the stars</div>
+            </motion.div>
+          </Link>
+
+          <Link href="/blackhole">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 bg-blue-600/20 border border-blue-500/50 rounded-lg backdrop-blur-sm hover:bg-blue-600/30 transition-all duration-300 text-center"
+            >
+              <div className="text-xl font-semibold">Black Hole</div>
+              <div className="text-sm text-white/70 mt-1">Enter the void</div>
+            </motion.div>
+          </Link>
+        </motion.div>
       </div>
 
-
-      {/* Slider - Bottom Centered - Increased padding on mobile for Android bottom bar */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 z-50 flex justify-center px-5 sm:pb-8 lg:pb-12"
-        style={{
-          paddingBottom: 'clamp(7rem, env(safe-area-inset-bottom, 0px) + 7rem, 10rem)',
-        }}
-      >
-        <div className="w-full max-w-[90%] sm:max-w-[85%] lg:max-w-[80%]">
-          <Slider
-            value={sliderValue}
-            onValueChange={handleSliderChange}
-            min={0}
-            max={100}
-            step={0.1}  
-            className="w-full"
-            aria-label="Narrative control"
-          />
-        </div>
-      </div>
+      {/* Background gradient effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-blue-900/20" />
     </main>
   )
 }
-
