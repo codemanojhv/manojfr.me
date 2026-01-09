@@ -10,8 +10,8 @@ const navLinks = [
 
 export function HeroNavigation() {
   return (
-    <nav className="fixed top-4 right-4 z-[60] sm:top-6 sm:right-6 lg:top-8 lg:right-8">
-      <ul className="flex items-center gap-3 sm:gap-4 lg:gap-6">
+    <nav className="fixed top-3 right-3 z-[60] sm:top-4 sm:right-4 md:top-6 md:right-6 lg:top-8 lg:right-8 safe-area-inset">
+      <ul className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
         {navLinks.map((link, index) => (
           <motion.li
             key={link.label}
@@ -21,7 +21,34 @@ export function HeroNavigation() {
           >
             <Link
               href={link.href}
-              className="text-xs font-semibold uppercase tracking-wider text-white/80 transition-all duration-300 hover:text-white hover:scale-105 sm:text-sm lg:text-base backdrop-blur-sm bg-white/5 px-3 py-2 rounded-lg border border-white/10 hover:border-white/30"
+              className="
+                block
+                text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg
+                font-semibold 
+                uppercase 
+                tracking-wider 
+                text-white/80 
+                transition-all 
+                duration-300 
+                hover:text-white 
+                active:scale-95
+                sm:hover:scale-105 
+                backdrop-blur-sm 
+                bg-white/5 
+                hover:bg-white/10
+                px-2.5 py-1.5
+                sm:px-3 sm:py-2 
+                md:px-4 md:py-2.5
+                lg:px-5 lg:py-3
+                rounded-md
+                sm:rounded-lg 
+                border 
+                border-white/10 
+                hover:border-white/30
+                touch-manipulation
+                select-none
+                whitespace-nowrap
+              "
             >
               {link.label}
             </Link>

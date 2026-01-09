@@ -78,19 +78,28 @@ export function UnicornHero() {
 
   if (hasError) {
     return (
-      <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-black via-zinc-900 to-black">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-white/30 text-sm">Background animation unavailable</p>
+      <div className="relative w-full h-screen h-dvh overflow-hidden bg-gradient-to-br from-black via-zinc-900 to-black">
+        <div className="absolute inset-0 flex items-center justify-center px-4">
+          <p className="text-white/30 text-xs sm:text-sm text-center">Background animation unavailable</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div ref={containerRef} className="relative w-full h-screen overflow-hidden">
+    <div 
+      ref={containerRef} 
+      className="relative w-full h-screen h-dvh overflow-hidden"
+    >
       <div 
         data-us-project="p1tRtRZVB953CevTQCGK" 
-        className="w-full h-full"
+        className="w-full h-full min-h-screen min-h-dvh"
+        style={{
+          width: '100vw',
+          height: '100vh',
+          minHeight: '100dvh',
+          position: 'relative'
+        }}
       />
     </div>
   )
